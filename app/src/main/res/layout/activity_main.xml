@@ -10,19 +10,48 @@
     tools:context="com.project2.db.gyrosend.MainActivity">
 
     <TextView
+        android:id="@+id/tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/tv" />
+        android:text="Hello World!" />
 
     <TextView
+        android:id="@+id/tv_gps"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="gps values"
-        android:id="@+id/tv_gps"
-        android:layout_below="@+id/tv"
+        android:layout_alignEnd="@+id/tv"
         android:layout_alignParentStart="true"
-        android:layout_alignEnd="@+id/tv" />
+        android:layout_below="@+id/tv"
+        android:text="gps values"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Button
+        android:id="@+id/button_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/button_calibrate"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/button_calibrate"
+        android:layout_marginBottom="58dp"
+        android:onClick="onClick"
+        android:text="START" />
+
+    <Button
+        android:id="@+id/button_calibrate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:onClick="onButtonCalibClick"
+        android:text="CALIBRATE" />
+
+    <TextView
+        android:id="@+id/text2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_start"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="41dp"
+        android:text="New Text" />
 
 </RelativeLayout>
