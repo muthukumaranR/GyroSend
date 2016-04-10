@@ -35,7 +35,7 @@ import java.net.ServerSocket;
 
 public class MainActivity extends Activity implements LocationListener, SensorEventListener {
     private static final int SERVERPORT = 5000;
-    private static final String SERVER_IP = "192.168.0.101";
+    private static final String SERVER_IP = "192.168.0.102";
     boolean isClicked =false;
     private TextView tv;
     private TextView tv_gps;
@@ -132,6 +132,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         senx = (int)event.values[2];
         seny  = (int)event.values[1];
         senz = (int)event.values[0];
+        tv = (TextView) findViewById(R.id.tv);
         //else it will output the Roll, Pitch and Yawn values
         tv.setText("Orientation X (Roll) :"+ Float.toString(event.values[2]) +"\n"+
                 "Orientation Y (Pitch) :"+ Float.toString(event.values[1]) +"\n"+
@@ -170,7 +171,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
     //client part
 
-    public void onClick(View view) {
+    public void onBtnClick(View view) {
         if(isClicked == true){
             new Thread(new messageThread()).start();
             isClicked = false;

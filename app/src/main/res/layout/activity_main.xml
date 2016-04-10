@@ -33,7 +33,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignStart="@+id/button_calibrate"
         android:layout_marginBottom="58dp"
-        android:onClick="onClick"
+        android:onClick="onBtnClick"
         android:text="START" />
 
     <Button
