@@ -1,5 +1,4 @@
 package com.project2.db.gyrosend;
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -12,37 +11,39 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Log;
 
-import java.io.BufferedWriter;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import android.app.Activity;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.EditText;
-
-import java.net.ServerSocket;
-
 public class MainActivity extends Activity implements LocationListener, SensorEventListener {
+    private static final String TAG = MainActivity.class.getSimpleName();
     private static final int SERVERPORT = 5000;
     private static final String SERVER_IP = "192.168.0.102";
     boolean isClicked =false;
+    boolean running = false;
+    //the Sensor Manager
+    DataOutputStream dataOutputStream = null;
+    DataInputStream dataInputStream = null;
+    private Button p1_button;
     private TextView tv;
     private TextView tv_gps;
-    //the Sensor Manager
     private SensorManager sManager;
     private LocationManager locationManager;
     private int senx,seny,senz;
+    private int senx0,senx1,senx2;
+    private int seny0,seny1,seny2;
+    private int senz0,senz1,senz2;
     private float lat,lon;
     //client socket
     private Socket socket;
@@ -87,7 +88,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0.2f, this);
+        // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 0.2f, this);
 
 
     }
@@ -132,16 +133,16 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         senx = (int)event.values[2];
         seny  = (int)event.values[1];
         senz = (int)event.values[0];
-        tv = (TextView) findViewById(R.id.tv);
+        tv=(TextView) findViewById(R.id.tv);
         //else it will output the Roll, Pitch and Yawn values
         tv.setText("Orientation X (Roll) :"+ Float.toString(event.values[2]) +"\n"+
                 "Orientation Y (Pitch) :"+ Float.toString(event.values[1]) +"\n"+
                 "Orientation Z (Yaw) :"+ Float.toString(event.values[0]));
     }
     public void onLocationChanged(Location location) {
-         tv_gps = (TextView) findViewById(R.id.tv_gps);
-        String str = "Latitude: \n"+location.getLatitude()+"Longitude: "+location.getLongitude();
-        tv_gps.setText(str);
+        //tv_gps = (TextView) findViewById(R.id.tv_gps);
+        //String str = "Latitude: \n"+location.getLatitude()+"Longitude: "+location.getLongitude();
+        //tv_gps.setText(str);
         //Toast.makeText(getBaseContext(), str, Toast.LENGTH_LONG).show();
     }
 
@@ -171,20 +172,50 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
     //client part
 
-    public void onBtnClick(View view) {
+    public void onClick(View view) {
+
+         p1_button = (Button)findViewById(R.id.button_start);
+
         if(isClicked == true){
             new Thread(new messageThread()).start();
+            p1_button.setText("STOP");
+            running = true;
             isClicked = false;
         }
         else{
+            p1_button.setText("START");
+            running = false;
             isClicked = true;
         }
 
 
 
+    }
+
+    public void splitInt(int num,int coord){
+        int hun,ten, one;
+        hun = num/100;
+        if(hun<0)hun = hun*-1;
+        ten = (num/10)%10;
+        if(ten<0)ten = ten*-1;
+        one = num%10;
+
+        if(coord==0){
+            senx0 = hun;
+            senx1 = ten;
+            senx2 = one;
         }
-
-
+        if(coord==1){
+            seny0 = hun;
+            seny1 = ten;
+            seny2 = one;
+        }
+        if(coord==2){
+            senz0 = hun;
+            senz1 = ten;
+            senz2 = one;
+        }
+    }
 
     class ClientThread implements Runnable {
 
@@ -206,28 +237,32 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
 
     }
 
-
     class messageThread implements Runnable {
 
 
         public void run() {
-            try {
+            while(running) {
+                try {
+                    dataOutputStream = new DataOutputStream(socket.getOutputStream());
 
-                String str = senx + "/n" + seny + "/n" + senz + "/n";
-                PrintWriter out = new PrintWriter(new BufferedWriter(
-                        new OutputStreamWriter(socket.getOutputStream())),
-                        true);
-                out.println(str);
+                    splitInt(senx,0);
+                    splitInt(seny,1);
+                    splitInt(senz,2);
 
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
+                    String str = senx0+" "+senx1+" "+senx2+" "+seny0+" "+seny1+" "+seny2+" "+senz0+" "+senz1+" "+senz2+"\0";
+                    dataOutputStream.write(str.getBytes());
+                    Log.d(TAG,"message sent "+str);
+                    dataOutputStream.flush();
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    running = false;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    running = false;
+                }
             }
         }
     }
 }
-
-
