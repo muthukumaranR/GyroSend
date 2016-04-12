@@ -130,6 +130,7 @@ public class MainActivity extends Activity implements LocationListener, SensorEv
         {
             return;
         }
+
         senx = (int)event.values[2];
         seny  = (int)event.values[1];
         senz = (int)event.values[0];
